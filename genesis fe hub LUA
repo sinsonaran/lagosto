@@ -1,0 +1,242 @@
+-- Basic UI Setup
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local GenesisTextLabel = Instance.new("TextLabel")
+local CreditsLabel = Instance.new("TextLabel")
+local ScriptsLabel = Instance.new("TextLabel")
+local ScrollFrame = Instance.new("ScrollingFrame")
+local CloseButton = Instance.new("TextButton")
+
+ScreenGui.Name = "GenesisFEHubUI"
+ScreenGui.Parent = game.CoreGui
+
+-- Main Frame Setup
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BorderSizePixel = 5
+MainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
+MainFrame.Size = UDim2.new(0, 600, 0, 500)
+MainFrame.Visible = true -- Set to true for testing
+
+-- Rounded corners for Main Frame
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 15)
+UICorner.Parent = MainFrame
+
+-- Chroma Gradient for the edges
+local EdgeGradient = Instance.new("UIGradient")
+EdgeGradient.Parent = MainFrame
+EdgeGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 127, 0)),
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 255, 0)),
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0, 255, 0)),
+    ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 255))
+})
+
+-- Rotate Gradient for animated chroma edges
+spawn(function()
+    while true do
+        for i = 0, 360, 1 do
+            EdgeGradient.Rotation = i
+            wait(0.03)
+        end
+    end
+end)
+
+-- Subtle Chroma Inside the Main Frame
+local InnerGradient = Instance.new("UIGradient")
+InnerGradient.Parent = MainFrame
+InnerGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(50, 150, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 50, 50))
+})
+InnerGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.6),
+    NumberSequenceKeypoint.new(0.5, 0.4),
+    NumberSequenceKeypoint.new(1, 0.6)
+})
+
+-- Genesis FE Text with Chroma Effect
+GenesisTextLabel.Name = "GenesisTextLabel"
+GenesisTextLabel.Parent = MainFrame
+GenesisTextLabel.Size = UDim2.new(1, 0, 0.2, 0)
+GenesisTextLabel.Position = UDim2.new(0, 0, -0.15, 0)
+GenesisTextLabel.BackgroundTransparency = 1
+GenesisTextLabel.Font = Enum.Font.FredokaOne -- Changed font
+GenesisTextLabel.Text = "GENESIS FE"
+GenesisTextLabel.TextSize = 80
+GenesisTextLabel.TextColor3 = Color3.new(1, 1, 1)
+
+-- Chroma Gradient for Genesis FE Text
+local ChromaGradient = Instance.new("UIGradient")
+ChromaGradient.Parent = GenesisTextLabel
+ChromaGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 127, 0)),
+    ColorSequenceKeypoint.new(0.34, Color3.fromRGB(255, 255, 0)),
+    ColorSequenceKeypoint.new(0.51, Color3.fromRGB(0, 255, 0)),
+    ColorSequenceKeypoint.new(0.68, Color3.fromRGB(0, 255, 255)),
+    ColorSequenceKeypoint.new(0.85, Color3.fromRGB(0, 0, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 0, 255))
+})
+
+-- Rotate Gradient for Chroma Text Effect
+spawn(function()
+    while true do
+        for i = 0, 360, 1 do
+            ChromaGradient.Rotation = i
+            wait(0.03)
+        end
+    end
+end)
+
+-- Smooth Dragging Functionality
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local dragging, dragStart, startPos
+
+local function startDragging()
+    dragging = true
+    TweenService:Create(MainFrame, TweenInfo.new(0.2), {BackgroundTransparency = 0.5}):Play() -- Optional effect during dragging
+end
+
+local function stopDragging()
+    dragging = false
+    TweenService:Create(MainFrame, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play() -- Reset effect
+end
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        startDragging()
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        TweenService:Create(MainFrame, TweenInfo.new(0.1), {Position = newPosition}):Play()
+    end
+end)
+
+MainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        stopDragging()
+    end
+end)
+
+-- Toggle UI with the "P" Key
+UIS.InputBegan:Connect(function(input, isProcessed)
+    if not isProcessed then
+        if input.KeyCode == Enum.KeyCode.P then
+            MainFrame.Visible = not MainFrame.Visible -- Toggle visibility
+        end
+    end
+end)
+
+-- Credits Label
+CreditsLabel.Name = "CreditsLabel"
+CreditsLabel.Parent = MainFrame
+CreditsLabel.Size = UDim2.new(1, 0, 0, 40)
+CreditsLabel.Position = UDim2.new(0, 0, 0.1, 0)
+CreditsLabel.BackgroundTransparency = 1
+CreditsLabel.Font = Enum.Font.Gotham
+CreditsLabel.Text = "Credits - Script Creator: Genesis FE, Hub Creator: sinsonaran"
+CreditsLabel.TextSize = 20
+CreditsLabel.TextColor3 = Color3.new(1, 1, 1)
+
+-- Scripts Label
+ScriptsLabel.Name = "ScriptsLabel"
+ScriptsLabel.Parent = MainFrame
+ScriptsLabel.Size = UDim2.new(1, 0, 0, 40)
+ScriptsLabel.Position = UDim2.new(0, 0, 0.2, 0)
+ScriptsLabel.BackgroundTransparency = 1
+ScriptsLabel.Font = Enum.Font.Gotham
+ScriptsLabel.Text = "Scripts - Select a script to execute:"
+ScriptsLabel.TextSize = 20
+ScriptsLabel.TextColor3 = Color3.new(1, 1, 1)
+
+-- ScrollFrame for script buttons
+ScrollFrame.Name = "ScrollFrame"
+ScrollFrame.Parent = MainFrame
+ScrollFrame.Position = UDim2.new(0, 10, 0.35, 0)
+ScrollFrame.Size = UDim2.new(1, -20, 0.6, -10)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.ScrollBarThickness = 8
+
+-- Adding UIListLayout to the ScrollFrame for spacing
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = ScrollFrame
+UIListLayout.FillDirection = Enum.FillDirection.Vertical
+UIListLayout.Padding = UDim.new(0, 5)
+
+-- Function to add clean script buttons
+local function addButton(name, url)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, 0, 0, 40)
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.BorderSizePixel = 0
+    Button.Text = name
+    Button.TextColor3 = Color3.new(1, 1, 1)
+    Button.Font = Enum.Font.Gotham -- Consistent font for all buttons
+    Button.TextSize = 18
+    Button.Parent = ScrollFrame
+
+    local ButtonUICorner = Instance.new("UICorner")
+    ButtonUICorner.CornerRadius = UDim.new(0, 10)
+    ButtonUICorner.Parent = Button
+
+    Button.MouseButton1Click:Connect(function()
+        loadstring(game:HttpGet(url))()
+    end)
+end
+
+-- Add your script buttons here
+addButton("Goner", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Goner")
+addButton("Ban Hammer", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Ban%20Hammer")
+addButton("Good Cop Bad Cop", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Good%20Cop%20Bad%20Cop")
+addButton("DearSister", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Dearsister")
+addButton("Krystal Dance(A BIT BROKEN)", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Krystal%20Dance")
+addButton("AK-47", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/AK-47")
+addButton("Linked Sword", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Linked%20Sword")
+addButton("Neko", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Neko")
+addButton("Studio Dummy", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Studio%20Dummy")
+addButton("Banisher", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Banisher")
+addButton("Lightning Cannon", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Lightning%20Cannon")
+addButton("Star Glitcher", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Star%20Glitcher")
+addButton("Sniper", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Sniper")
+addButton("Pistol", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Pistol")
+addButton("Neptunian V", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Neptunian%20V")
+addButton("Motorcycle", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Motorcycle")
+addButton("Minigun", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Loadstrings/Minigun")
+addButton("Patchma Hub", "https://pastebin.com/raw/G8tpwmBe")
+addButton("Karambit", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Loadstrings/Karambit")
+addButton("Gale fighter", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Gale%20Fighter")
+addButton("sadist genocider", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Sadist%20Genocider")
+addButton("puppet master", "https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Puppet%20Master")
+
+
+
+
+
+-- Close Button
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = MainFrame
+CloseButton.Size = UDim2.new(0, 100, 0, 30)
+CloseButton.Position = UDim2.new(1, -110, 0, 10)
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseButton.Text = "Close"
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.Font = Enum.Font.Gotham
+CloseButton.TextSize = 18
+
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false -- Close the UI
+end)
